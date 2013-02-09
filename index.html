@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Fusor Simulation for Michal Racko</title>
+  <script src="processing.js"></script>
+  <style type="text/css">
+		body{
+			background-color:#000000;
+			margin:0px 0px 0px 0px;
+		}
+
+	</style>
+</head>
+<body>
+<div id="frame">
+<script type="application/processing" target="sketch">
+
+ArrayList particles;
+
+void setup()
+{
+  size(1080, 720);
+  background(50);
+  smooth();
+
+  particles = new ArrayList();
+}
+
+void draw()
+{
+  background(0);
+
+}
+
+class Particle {
+
+  PVector loc = new PVector(100, 100);
+  PVector vel = new PVector(0, 0);
+  PVector acc = new PVector(0, 0);
+  float topSpeed = 3;
+  float rad = 5;
+
+  float age;
+  float maxAge;
+
+  int opacity;
+  int  colorChange = 30;
+  int xoff = 0.0;
+  int xincrement = 0.1;
+
+  Particle(int tempX, int tempY) {
+  	loc.x = tempX;
+  	loc.y = tempY;
+
+  	vel = new PVector(0, 0);
+  	acc = new PVector(-0.001, 0.01);
+
+  	age = 0;
+    maxAge = random(0, 100)+550;
+
+    opacity = 150;
+  }
+
+  void update(){
+  	vel.add(acc);
+  	vel.limit(topSpeed);
+  	loc.add(vel);
+  	frame();
+  	wander();
+  	cohere();
+  	seperate();
+  	align();
+  	mouseAvoid();
+  	drawLines();
+
+  	xoff += xincrement;
+
+  }
+
+  void draw() {
+
+  	colorMode(HSB);
+    fill(colorChange, 255, 255, opacity);
+    noStroke();
+    ellipse(loc.x, loc.y, rad*2, rad*2);
+  }
+
+  void frame(){
+  	if (loc.y>height-rad) {
+      loc.y = height-rad;
+      vel.y = vel.y * -1;
+      colorChange = int(noise(xoff)*30);
+    }
+
+    if (loc.y<rad) {
+      loc.y = rad;
+      vel.y = vel.y * -1;
+      colorChange = int(noise(xoff)*30);
+    }
+
+    if (loc.x>width-rad) {
+      loc.x = width-rad;
+      vel.x = vel.x * -1;
+      colorChange = int(noise(xoff)*30);
+    }
+
+    if (loc.x<rad) {
+      loc.x = rad;
+      vel.x = vel.x * -1;
+      colorChange = int(noise(xoff)*30);
+    }
+  }
+
+  void wander(){
+  	PVector wander = new PVector(random(-0.1, 0.1), random(-0.1, 0.1));
+  	acc.add(wander);
+  }
+
+  void cohere() {
+    PVector avgMid = new PVector(0, 0);
+    for (int i=0; i<particles.size(); i++) {
+      Particle particle = (Particle) particles.get(i);
+      avgMid.add(particle.loc);
+    }
+    PVector focus = new PVector(0, 0);
+    focus.x = avgMid.x/particles.size();
+    focus.y = avgMid.y/particles.size();
+
+    PVector dir = PVector.sub(focus, loc);
+    dir.normalize();
+    dir.mult(1);
+
+    acc.add(dir);
+  }
+
+  void seperate() {
+
+    for (int i=0; i<particles.size(); i++) {
+      Particle particle = (Particle) particles.get(i);
+      float d = PVector.dist(particle.loc, this.loc);
+      if (d < 50) {
+        PVector dir = PVector.sub(this.loc, particle.loc);
+        dir.normalize();
+        acc.add(dir);
+      }
+    }
+  }
+
+  void align() {
+    PVector avgDir = new PVector(0, 0);
+    int count = 0;
+    for (int i=0; i<particles.size(); i++) {
+      Particle particle = (Particle) particles.get(i);
+      float d = PVector.dist(particle.loc, this.loc);
+      if (d < 1000) {
+        avgDir.add(particle.loc);
+        count ++;
+      }
+    }
+    if (count > 0){
+       avgDir.div(float(count));
+       avgDir.normalize();
+       vel.add(avgDir);
+    }
+  }
+
+  void drawLines(){
+    for (int i=0; i<particles.size(); i++) {
+      Particle particle = (Particle) particles.get(i);
+      float d = PVector.dist(particle.loc, this.loc);
+      if (d < 100) {
+      	colorChange = int(noise(xoff)*d);
+        stroke(colorChange, 255, int(d*2.5), 35);
+        line(this.loc.x, this.loc.y, particle.loc.x, particle.loc.y);
+      }
+    }
+  }
+
+  void mouseAvoid() {
+
+	PVector mousePos = new PVector(mouseX, mouseY);
+  	float d = PVector.dist(loc, mousePos);
+  	if (d < 150) {
+	   PVector dir = PVector.sub(loc, mousePos);
+	   dir.normalize();
+	   acc.add(dir);
+	}
+
+  }
+
+  boolean dead() {
+    float timeOfDeath = (maxAge - age);
+    if (timeOfDeath < 60) {
+      opacity = opacity - 1;
+    }
+    age ++;
+    if (age >= maxAge) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+}
+
+</script>
+<canvas id="sketch"></canvas>
+</div>
+
+</body>
+</html>
