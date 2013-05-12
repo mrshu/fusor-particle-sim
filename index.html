@@ -49,7 +49,7 @@ void setup()
   brownSpots.add(new Particle(width/2 - 4*x, height/2 - x, 142, 42, 42, 5));
   brownSpots.add(new Particle(width/2 + 4*x, height/2 + x, 142, 42, 42, 5));
 
-  for (i=0; i < 10; i++)
+  for (i=0; i < 100; i++)
     particles.add(new Particle(width/2 - 4*x + int(random(-10, 10)),
                                height/2 - x + int(random(-10, 10)), 30, 30, 30, 2));
 
@@ -111,7 +111,10 @@ void draw()
 
       p = K/(r*r);
 
-      PVector spotAvec = new PVector(cos(angle)*p, sin(angle)*p);
+      if (spotA.loc.x > width/2)
+        angle+= PI;
+
+        PVector spotAvec = new PVector(cos(angle)*p, sin(angle)*p);
       spotA.loc.add(spotAvec);
 
       if (r < spotB.rad+spotA.rad)
