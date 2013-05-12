@@ -24,6 +24,9 @@
 
 ArrayList particles;
 
+L = 20;
+K = 100*L;
+
 void setup()
 {
   size(880, 700);
@@ -36,15 +39,19 @@ void setup()
 
   int x = 80;
 
-  blueSpots.add(new Particle(width/2 - x, height/2, 0, 0, 255));
-  blueSpots.add(new Particle(width/2 + x, height/2, 0, 0, 255));
-  blueSpots.add(new Particle(width/2 - x/2, height/2 - x/2, 0, 0, 255));
-  blueSpots.add(new Particle(width/2 + x/2, height/2 + x/2, 0, 0, 255));
-  blueSpots.add(new Particle(width/2 - x/2, height/2 + x/2, 0, 0, 255));
-  blueSpots.add(new Particle(width/2 + x/2, height/2 - x/2, 0, 0, 255));
+  blueSpots.add(new Particle(width/2 - x, height/2, 0, 0, 255, 5));
+  blueSpots.add(new Particle(width/2 + x, height/2, 0, 0, 255, 5));
+  blueSpots.add(new Particle(width/2 - x/2, height/2 - x/2, 0, 0, 255, 5));
+  blueSpots.add(new Particle(width/2 + x/2, height/2 + x/2, 0, 0, 255, 5));
+  blueSpots.add(new Particle(width/2 - x/2, height/2 + x/2, 0, 0, 255, 5));
+  blueSpots.add(new Particle(width/2 + x/2, height/2 - x/2, 0, 0, 255, 5));
 
-  brownSpots.add(new Particle(width/2 - 3*x, height/2 - x, 142, 42, 42));
-  brownSpots.add(new Particle(width/2 + 3*x, height/2 + x, 142, 42, 42));
+  brownSpots.add(new Particle(width/2 - 3.5*x, height/2 - x, 142, 42, 42, 5));
+  brownSpots.add(new Particle(width/2 + 3.5*x, height/2 + x, 142, 42, 42, 5));
+
+  particles.add(new Particle(80, 80, 30, 30, 30, 2));
+  particles.add(new Particle(100, 100, 30, 30, 30, 2));
+  particles.add(new Particle(120, 120, 30, 30, 30, 2));
 }
 
 void draw()
@@ -59,6 +66,42 @@ void draw()
     spot.draw();
   }
 
+  for (int i=0; i< particles.size(); i++) {
+    for (int j=i; j< particles.size(); j++) {
+      if (i == j)
+        continue;
+
+      Particle spotA = (Particle) particles.get(i);
+      Particle spotB = (Particle) particles.get(j);
+
+      if (spotA.loc.x + spotA.loc.y < spotB.loc.x + spotB.loc.y) {
+        Particle tmp = spotA;
+        spotA = spotB;
+        spotB = tmp;
+      }
+
+
+      float dx = (spotA.loc.x - spotB.loc.x);
+      float dy = (spotA.loc.y - spotB.loc.y);
+      float r = sqrt(dx*dx + dy*dy);
+
+      console.log(i, j, dx);
+
+      float angle = atan(dx/dy);
+
+      p = L/(r*r);
+
+      PVector spotAvec = new PVector(cos(angle)*p, sin(angle)*p);
+      PVector spotBvec = new PVector(cos(angle-PI)*p, sin(angle-PI)*p);
+      spotA.loc.add(spotAvec);
+      spotB.loc.add(spotBvec);
+    }
+  }
+
+  for (int i=0; i< particles.size(); i++) {
+    Particle spot = (Particle) particles.get(i);
+    spot.draw();
+  }
 
 
 
@@ -81,7 +124,7 @@ class Particle {
   int G = 255;
   int B = 255;
 
-  Particle(int tempX, int tempY, int r, int g, int b) {
+  Particle(int tempX, int tempY, int r, int g, int b, float radius) {
   	loc.x = tempX;
   	loc.y = tempY;
 
@@ -93,6 +136,7 @@ class Particle {
     B = b;
 
     opacity = 0;
+    rad = radius;
   }
 
   void update(){
