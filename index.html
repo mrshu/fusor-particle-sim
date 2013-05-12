@@ -5,9 +5,16 @@
   <script src="processing.js"></script>
   <style type="text/css">
 		body{
-			background-color:#000000;
-			margin:0px 0px 0px 0px;
+			background-color:#333;
 		}
+
+    canvas {
+    }
+
+    #frame {
+      width: 880px;
+      margin: 0 auto;
+    }
 
 	</style>
 </head>
@@ -27,18 +34,39 @@ void setup()
   blueSpots = new ArrayList();
   brownSpots = new ArrayList();
 
-  blueSpots.add(Particle());
+  int x = 80;
+
+  blueSpots.add(new Particle(width/2 - x, height/2, 0, 0, 255));
+  blueSpots.add(new Particle(width/2 + x, height/2, 0, 0, 255));
+  blueSpots.add(new Particle(width/2 - x/2, height/2 - x/2, 0, 0, 255));
+  blueSpots.add(new Particle(width/2 + x/2, height/2 + x/2, 0, 0, 255));
+  blueSpots.add(new Particle(width/2 - x/2, height/2 + x/2, 0, 0, 255));
+  blueSpots.add(new Particle(width/2 + x/2, height/2 - x/2, 0, 0, 255));
+
+  brownSpots.add(new Particle(width/2 - 3*x, height/2 - x, 142, 42, 42));
+  brownSpots.add(new Particle(width/2 + 3*x, height/2 + x, 142, 42, 42));
 }
 
 void draw()
 {
-  background(0);
+  background(0, 0, 0);
+  for (int i=0; i< blueSpots.size(); i++) {
+    Particle spot = (Particle) blueSpots.get(i);
+    spot.draw();
+  }
+  for (int i=0; i< brownSpots.size(); i++) {
+    Particle spot = (Particle) brownSpots.get(i);
+    spot.draw();
+  }
+
+
+
 
 }
 
 class Particle {
 
-  PVector loc = new PVector(height/2, width/2);
+  PVector loc = new PVector(width/2, height/2);
   PVector vel = new PVector(0, 0);
   PVector acc = new PVector(0, 0);
   float topSpeed = 3;
@@ -58,13 +86,13 @@ class Particle {
   	loc.y = tempY;
 
   	vel = new PVector(0, 0);
-  	acc = new PVector(-0.001, 0.01);
+  	acc = new PVector(0, 0);
 
     R = r;
     G = g;
     B = b;
 
-    opacity = 150;
+    opacity = 0;
   }
 
   void update(){
@@ -84,8 +112,8 @@ class Particle {
 
   void draw() {
 
-  	colorMode(HSB);
-    fill(R, G, B, opacity);
+  	colorMode(RGB);
+    fill(R, G, B);
     noStroke();
     ellipse(loc.x, loc.y, rad*2, rad*2);
   }
